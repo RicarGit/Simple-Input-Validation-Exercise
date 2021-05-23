@@ -6,58 +6,75 @@ const input = document.querySelector('#username')
 const form = document.querySelector('form')
 const button = document.querySelector('.button')
 
-const regex = /^[a-zA-ZçÇ]{6,}$/
-const isValidInput = inputValue => regex.test(inputValue)
-
 const inputFeedback = document.createElement('p')
 const submitFeedback = document.createElement('p')
 
-submitFeedback.setAttribute('data-feedback', 'submit-feedback')
+const regex = /^[a-zA-ZçÇ]{6,}$/
+const isValidInput = inputValue => regex.test(inputValue)
 
-input.addEventListener('input', event => {
-  const inputValue = event.target.value
-  const submitFeedbackExists = document
+const insertFeedbackElement = (element, position, feedbackElement) =>
+  element.insertAdjacentElement(position, feedbackElement)
+
+const insertAttributeToElement = (element, attribute, attributeValue) =>
+  element.setAttribute(attribute, attributeValue)
+
+insertAttributeToElement(submitFeedback, 'data-feedback', 'submit-feedback')
+
+const feedbackMessage = (element, message) => element.textContent = message
+
+const clearInput = ({ target }) => {
+  target.username.value = ''
+  target.username.focus()
+}
+
+const removeSubmitParagraph = () => {
+  const submitParagraphFeedbackExists = document
     .querySelector('[data-feedback="submit-feedback"]')
 
-  if (submitFeedbackExists) {
+  if (submitParagraphFeedbackExists) {
     submitFeedback.remove()
   }
+}
+
+const showInputInfo = event => {
+  const inputValue = event.target.value
+  removeSubmitParagraph()
 
   if (isValidInput(inputValue)) {
-    inputFeedback.textContent = "Username válido =)"
-    inputFeedback.setAttribute('class', 'username-sucess-feedback')
-    input.insertAdjacentElement('afterend', inputFeedback)
+    feedbackMessage(inputFeedback, "Username válido =)")
+    insertAttributeToElement(inputFeedback, 'class', 'username-sucess-feedback')
+    insertFeedbackElement(input, 'afterend', inputFeedback)
     return
   }
 
-  inputFeedback.textContent = 'O valor deve conter no mínimo 6 caracteres, com apenas letras maiúsculas e/ou minúsculas'
-  inputFeedback.setAttribute('class', 'username-help-feedback')
-  input.insertAdjacentElement('afterend', inputFeedback)
+  feedbackMessage(inputFeedback, 'O valor deve conter no mínimo 6 caracteres, com apenas letras maiúsculas e/ou minúsculas')
+  insertAttributeToElement(inputFeedback, 'class', 'username-help-feedback')
+  insertFeedbackElement(input, 'afterend', inputFeedback)
+}
 
-})
-
-form.addEventListener('submit', event => {
+const showSubmitInfo = event => {
   event.preventDefault()
-
   const inputValue = event.target.username.value
 
   if (isValidInput(inputValue)) {
-    submitFeedback.textContent = "Dados enviados =)"
-    submitFeedback.setAttribute('class', 'submit-sucess-feedback')
-    button.insertAdjacentElement('afterend', submitFeedback)
-    event.target.username.value = ''
-    event.target.username.focus()
+    feedbackMessage(submitFeedback, "Dados enviados =)")
+    insertAttributeToElement(submitFeedback, 'class', 'submit-sucess-feedback')
+    insertFeedbackElement(button, 'afterend', submitFeedback)
+    clearInput(event)
     return
   }
 
-  submitFeedback.textContent = "Por favor, insira um username válido"
-  submitFeedback.setAttribute('class', 'submit-help-feedback')
-  button.insertAdjacentElement('afterend', submitFeedback)
-  event.target.username.focus()
-})
+  feedbackMessage(submitFeedback, "Por favor, insira um username válido")
+  insertAttributeToElement(submitFeedback, 'class', 'submit-help-feedback')
+  insertFeedbackElement(button, 'afterend', submitFeedback)
+  clearInput(event)
+}
+
+input.addEventListener('input', showInputInfo)
+form.addEventListener('submit', showSubmitInfo)
 
 /*
-  01
+01
 
   - Valide o valor do input "username" à medida em que ele é digitado;
   - Ele deve conter:
